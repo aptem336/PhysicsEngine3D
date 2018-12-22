@@ -12,7 +12,7 @@ import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.glu.GLU;
 
-public class FF implements GLEventListener {
+public class BC implements GLEventListener {
 
     public static void main(String[] args) {
         //создаЄм окно
@@ -32,7 +32,7 @@ public class FF implements GLEventListener {
         canvas.addMouseListener(listener);
         canvas.addMouseMotionListener(listener);
         canvas.addMouseWheelListener(listener);
-        canvas.addGLEventListener(new FF());
+        canvas.addGLEventListener(new BC());
         canvas.setBounds(0, 0, frame.getWidth(), frame.getHeight() - 30);
         //создаЄм управл€ющий методами отрисовки аниматор
         Animator animator = new Animator(canvas);
