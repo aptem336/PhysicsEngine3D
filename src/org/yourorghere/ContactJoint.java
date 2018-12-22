@@ -8,63 +8,78 @@ public class ContactJoint {
     private final double dstVelocity;
     //скорость отдалени€ дл€ решени€ проникновений
     private final double dstDisVelocity;
+    //инвертированна€ сумма инвертированнвх масс (так надо)
+    private final double iSumiMass;
     //нормали дл€ решени€ отсокока и трени€
-    private final Vector bounceNormal, frictionNormal;
+    private final Vector bounceNormal;
+    private final Vector frictionNormal;
+    //два сталкивающихс€ шара
+    private final Ball a, b;
+    //статичный шар с бесконечной плотностью => массой
+    private final static Ball STATIC_BALL = new Ball(1.0d, 1.0d / 0.0d);
 
-    public ContactJoint(Vector normal, double deep) {
-        //скорость отскока
-        dstVelocity = Solver.E * Vector.getDP(Solver.BALL.velocity, normal);
-        //скорость "вытаскивани€"
+    public ContactJoint(Ball a, Vector normal, double deep) {
+        //если шар подан один, то создаЄм гипотетический статичный, чтобы разрешение импульсов было правильным
+        this(a, STATIC_BALL, normal, deep);
+    }
+
+    public ContactJoint(Ball a, Ball b, Vector normal, double deep) {
+        this.a = a;
+        this.b = b;
+        dstVelocity = Solver.E * (Vector.getDP(a.velocity, normal) - Vector.getDP(b.velocity, normal));
         dstDisVelocity = -ERP * Math.max(0d, deep - 0.05d);
+        iSumiMass = 1.0d / (a.iMass + b.iMass);
         this.bounceNormal = normal;
-        //нормаль трени€ - нормированнна€ скорость
-        this.frictionNormal = Solver.BALL.velocity.getNormalized();
+        this.frictionNormal = a.velocity.getNormalized();
     }
 
     public void solveImpulse() {
         //вычис€лем вертикальную составл€ющую импульса
-        double blambda = calcLambda(Solver.BALL.velocity, bounceNormal, dstVelocity);
+        double bounce_lambda = calcLambda(a.velocity, b.velocity, bounceNormal, dstVelocity);
         //если она < 0 - объекты будут слипатьс€
-        if (blambda < 0d) {
+        if (bounce_lambda < 0d) {
             return;
         }
         //увеличиваем скорость шара на вертикальную составл€ющую
-        applyImpulse(Solver.BALL.velocity, bounceNormal, blambda);
+        applyImpulse(a.velocity, b.velocity, bounceNormal, bounce_lambda);
         //вычисл€ем горизонтальную состав€лющую
-        double flambda = calcLambda(Solver.BALL.velocity, frictionNormal, 0);
+        double friction_lambda = calcLambda(a.velocity, b.velocity, frictionNormal, 0);
         //трение не может быть больше реакции опоры на коэффициент трени€
-        if (Math.abs(flambda) > (blambda * Solver.F)) {
+        if (Math.abs(friction_lambda) > (bounce_lambda * Solver.F)) {
             //урезаем трение до реации опоры с сохранением знака
-            flambda = flambda > 0.0f ? 1.0f : -1.0f * blambda * Solver.F;
+            friction_lambda = friction_lambda > 0.0f ? 1.0f : -1.0f * bounce_lambda * Solver.F;
         }
         //увеличиваем скорость на горизонтальную составл€ющую
-        applyImpulse(Solver.BALL.velocity, frictionNormal, flambda);
+        applyImpulse(a.velocity, b.velocity, frictionNormal, friction_lambda);
     }
 
     public void solvePenetration() {
         //горизонтальна€ составл€юща€ "вытаскивани€"
-        double lambda = calcLambda(Solver.BALL.pvelocity, bounceNormal, dstDisVelocity);
+        double lambda = calcLambda(a.pvelocity, b.pvelocity, bounceNormal, dstDisVelocity);
         //если она < 0 - объекты будут слипатьс€
         if (lambda < 0d) {
             return;
         }
         //увеличиваем псевдоскорость шара на вертикальную составл€ющую    
-        applyImpulse(Solver.BALL.pvelocity, bounceNormal, lambda);
+        applyImpulse(a.pvelocity, b.pvelocity, bounceNormal, lambda);
     }
 
-    private double calcLambda(Vector vel, Vector normal, double dstV) {
+    private double calcLambda(Vector aVel, Vector bVel, Vector normal, double distanceVelocity) {
         //считаем необходимый испульс
         double dV = 0;
-        //проекци€ скорости на нормаль
-        dV -= Vector.getDP(vel, normal);
+        //проекци€ каждой скорости на нормаль
+        dV -= Vector.getDP(aVel, normal);
+        dV += Vector.getDP(bVel, normal);
         //скорость отдалени€
-        dV -= dstV;
-        return dV;
+        dV -= distanceVelocity;
+        //делим на 2 т.к. объекта два
+        return dV * iSumiMass;
     }
 
     //добавление импульса к скорост€м
-    private void applyImpulse(Vector vel, Vector normal, double lambda) {
-        vel.add(normal, lambda);
+    private void applyImpulse(Vector aVel, Vector bVel, Vector normal, double lambda) {
+        aVel.add(normal, lambda * a.iMass);
+        bVel.add(normal, -lambda * b.iMass);
     }
 
 }

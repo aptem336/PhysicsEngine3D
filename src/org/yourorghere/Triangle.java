@@ -34,6 +34,5 @@ public class Triangle {
             //получаем скалярные произведения
             edgesDots[i] = Vector.getDP(vertex[i], edgesNormal[i]);
         }
-
     }
 }

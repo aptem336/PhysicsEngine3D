@@ -3,6 +3,7 @@ package org.yourorghere;
 public class Vector {
 
     public final static Vector NULL = new Vector();
+    public final static Vector UP = new Vector(0.0d, 1.0d, 0.0d);
 
     public double x, y, z;
 
@@ -34,8 +35,13 @@ public class Vector {
         z += vector.z * value;
     }
 
+    //квадратная длина - для проверки пересечений шаров её достаточно
+    public double squreLen() {
+        return x * x + y * y + z * z;
+    }
+
     public double len() {
-        return Math.sqrt(x * x + y * y + z * z);
+        return Math.sqrt(squreLen());
     }
 
     public void normalize() {
@@ -45,6 +51,7 @@ public class Vector {
         z /= len;
     }
 
+    //скалярное произведение - проекция по-другому
     public static double getDP(Vector v1, Vector v2) {
         return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
     }
@@ -76,6 +83,7 @@ public class Vector {
         return new Vector(-x, -y, -z);
     }
 
+    //нормирования - "укоравчивание" до длины 1
     public Vector getNormalized() {
         double len = len();
         return new Vector(x / len, y / len, z / len);
