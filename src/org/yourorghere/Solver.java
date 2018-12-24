@@ -31,33 +31,33 @@ public class Solver {
             reset = false;
         }
         JOINTS.clear();
-        //процедура генерации контактов
-        Collision.generateJoints(JOINTS);
-        //IIC раз 
-        for (int i = 0; i < IIC; i++) {
-            //решаем импульсы
-            JOINTS.forEach((joint) -> {
-                joint.solveImpulse();
-            });
-        }
-        //PPC раз
-        for (int i = 0; i < PIC; i++) {
-            //решаем проникновения
-            JOINTS.forEach((joint) -> {
-                joint.solvePenetration();
+        //если движение разрешено
+        if (move) {
+            //процедура генерации контактов
+            Collision.generateJoints(JOINTS);
+            //IIC раз 
+            for (int i = 0; i < IIC; i++) {
+                //решаем импульсы
+                JOINTS.forEach((joint) -> {
+                    joint.solveImpulse();
+                });
+            }
+            //PPC раз
+            for (int i = 0; i < PIC; i++) {
+                //решаем проникновения
+                JOINTS.forEach((joint) -> {
+                    joint.solvePenetration();
+                });
+            }
+            //интегрируем позицию
+            BALLS.forEach((ball) -> {
+                ball.integrate();
             });
         }
         //отрисовываем каждую сферу
         BALLS.forEach((ball) -> {
             buildSphere(ball.location.x, ball.location.y, ball.location.z, ball.R, Color.gray);
         });
-        //если движение разрешено
-        if (move) {
-            //интегрируем позицию
-            BALLS.forEach((ball) -> {
-                ball.integrate();
-            });
-        }
     }
 
     private static final int SLICES = 20, STACKS = 20;

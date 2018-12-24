@@ -2,7 +2,7 @@ package org.yourorghere;
 
 import java.awt.Color;
 
-public class Triangle {
+public class Triangle extends Moveable {
 
     public static final Color COLOR = new Color(0xFFFFFF);
     //вершины
@@ -17,6 +17,9 @@ public class Triangle {
     public final double[] edgesDots;
 
     public Triangle(Vector[] vertex) {
+        super();
+        //масса бесконечна
+        iMass = 0.0d;
         this.vertex = vertex;
         edgesNormal = new Vector[3];
         edgesDots = new double[3];

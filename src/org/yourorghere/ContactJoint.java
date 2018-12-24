@@ -10,20 +10,13 @@ public class ContactJoint {
     private final double dstDisVelocity;
     //инвертированная сумма инвертированнвх масс (так надо)
     private final double iSumiMass;
-    //нормали для решения отсокока и трения
+    //нормали для решения отскока и трения
     private final Vector bounceNormal;
     private final Vector frictionNormal;
-    //два сталкивающихся шара
-    private final Ball a, b;
-    //статичный шар с бесконечной плотностью => массой
-    private final static Ball STATIC_BALL = new Ball(1.0d, 1.0d / 0.0d);
+    //два сталкивающихся объекта
+    private final Moveable a, b;
 
-    public ContactJoint(Ball a, Vector normal, double deep) {
-        //если шар подан один, то создаём гипотетический статичный, чтобы разрешение импульсов было правильным
-        this(a, STATIC_BALL, normal, deep);
-    }
-
-    public ContactJoint(Ball a, Ball b, Vector normal, double deep) {
+    public ContactJoint(Moveable a, Moveable b, Vector normal, double deep) {
         this.a = a;
         this.b = b;
         dstVelocity = Solver.E * (Vector.getDP(a.velocity, normal) - Vector.getDP(b.velocity, normal));
@@ -65,7 +58,7 @@ public class ContactJoint {
     }
 
     private double calcLambda(Vector aVel, Vector bVel, Vector normal, double distanceVelocity) {
-        //считаем необходимый испульс
+        //считаем необходимый импульс
         double dV = 0;
         //проекция каждой скорости на нормаль
         dV -= Vector.getDP(aVel, normal);

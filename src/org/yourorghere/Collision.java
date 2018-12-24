@@ -16,7 +16,7 @@ public class Collision {
                     //если вышел за плоскость (глубина > 0) но не прошёл насквозь до полвины
                     if (deep > 0 && deep < ball.R) {
                         //создаём новый контакт
-                        JOINTS.add(new ContactJoint(ball, triangle.planeNormal, deep));
+                        JOINTS.add(new ContactJoint(ball, triangle, triangle.planeNormal, deep));
                     }
                 }
             }
